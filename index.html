@@ -1,57 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banana E-shop</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Banány z Roztoků</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        header { background: #FFD700; padding: 20px; text-align: center; }
+        header h1 { color: #333; }
+        nav { background: #333; color: white; padding: 10px; text-align: center; }
+        nav button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; margin: 0 15px; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Produkty */
+        .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .product { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .product h3 { margin: 10px 0; }
+        .product p { color: #666; font-size: 14px; }
+        .price { font-size: 20px; font-weight: bold; color: #FFD700; margin: 10px 0; }
+        .controls { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+        .controls input { width: 60px; padding: 5px; }
+        button { background: #FFD700; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #FFC700; }
+        
+        /* Koš */
+        .cart-items { background: white; border-radius: 8px; padding: 20px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .cart-item .remove { background: #ff6b6b; color: white; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+        .cart-summary { background: #FFD700; padding: 15px; margin-top: 20px; border-radius: 8px; text-align: right; font-size: 18px; font-weight: bold; }
+        .empty-cart { text-align: center; padding: 40px; color: #999; }
+        
+        /* Kabinet */
+        .profile { background: white; padding: 20px; border-radius: 8px; max-width: 500px; }
+        .profile input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .profile label { display: block; margin-top: 15px; font-weight: bold; }
+        
+        .order-history { margin-top: 30px; }
+        .order { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #FFD700; }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Welcome to the Banana E-shop!</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Products</a></li>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Contact</a></li>
-                <li><a href="#" onclick="openAdminPanel()">Admin Panel</a></li>
-            </ul>
-        </nav>
+        <h1>🍌 Banány z Roztoků</h1>
+        <p>Čerstvé banány rovně z místního sadu</p>
     </header>
-    <main>
-        <section id="products">
-            <h2>Our Products</h2>
-            <div id="product-list"></div>
-        </section>
-        <section id="admin-panel" style="display:none;">
-            <h2>Admin Panel</h2>
-            <form id="login-form">
-                <label for="email">Email:</label>
-                <input type="email" id="email" value="admin@ruzove-banany.cz" required>
-                <label for="password">Password:</label>
-                <input type="password" id="password" value="admin123" required>
-                <button type="submit">Login</button>
-            </form>
-            <div id="admin-functions" style="display:none;">
-                <h3>Manage Products</h3>
-                <button onclick="loadStatistics()">View Statistics</button>
-                <button onclick="viewOrders()">View Orders</button>
-                <button onclick="changePrices()">Change Prices</button>
-                <button onclick="changeProductNames()">Change Product Names</button>
-                <button onclick="changeOrigins()">Change Origins</button>
+    
+    <nav>
+        <button onclick="showSection('shop')">Obchod</button>
+        <button onclick="showSection('cart')">Koš (<span id="cartCount">0</span>)</button>
+        <button onclick="showSection('profile')">Můj účet</button>
+    </nav>
+    
+    <div class="container">
+        <!-- OBCHOD -->
+        <div id="shop" class="section active">
+            <h2>Naši produkty</h2>
+            <div class="products" id="productsList"></div>
+        </div>
+        
+        <!-- KOŠ -->
+        <div id="cart" class="section">
+            <h2>Nákupní koš</h2>
+            <div id="cartContent"></div>
+            <button onclick="checkout()" style="width: 100%; margin-top: 20px; padding: 15px; font-size: 16px;">Objednat</button>
+        </div>
+        
+        <!-- PROFIL -->
+        <div id="profile" class="section">
+            <h2>Můj účet</h2>
+            <div class="profile">
+                <label>Jméno</label>
+                <input type="text" id="userName" placeholder="Vaše jméno">
+                
+                <label>Email</label>
+                <input type="email" id="userEmail" placeholder="Váš email">
+                
+                <label>Adresa</label>
+                <input type="text" id="userAddress" placeholder="Vaše adresa">
+                
+                <button onclick="saveProfile()">Uložit profil</button>
+                
+                <div class="order-history">
+                    <h3>Moje objednávky</h3>
+                    <div id="ordersList"></div>
+                </div>
             </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Banana E-shop</p>
-    </footer>
-    <script src="script.js"></script>
+        </div>
+    </div>
+    
     <script>
-        function openAdminPanel() {
-            document.getElementById('admin-panel').style.display = 'block';
+        // Inicializace produktů
+        const products = [
+            { id: 1, name: "Banány žluté", price: 49, origin: "Kostarika", quantity: 1 },
+            { id: 2, name: "Banány zralé", price: 39, origin: "Ekvádor", quantity: 1 },
+            { id: 3, name: "Banány plantáž", price: 59, origin: "Filipíny", quantity: 1 },
+            { id: 4, name: "Banány bio", price: 79, origin: "Peru", quantity: 1 }
+        ];
+        
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let user = JSON.parse(localStorage.getItem('user')) || { name: '', email: '', address: '' };
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        
+        // Zobrazení sekcí
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            
+            if (sectionId === 'profile') loadProfile();
+            if (sectionId === 'shop') renderProducts();
         }
-        // Additional JavaScript functions for admin functionalities will go here.
+        
+        // Renderování produktů
+        function renderProducts() {
+            const html = products.map(p => `
+                <div class="product">
+                    <h3>${p.name}</h3>
+                    <p><strong>Původ:</strong> ${p.origin}</p>
+                    <div class="price">${p.price} Kč/kg</div>
+                    <div class="controls">
+                        <input type="number" id="qty-${p.id}" min="1" value="1">
+                        <button onclick="addToCart(${p.id})">Přidat</button>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('productsList').innerHTML = html;
+        }
+        
+        // Přidání do košu
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const qty = parseInt(document.getElementById(`qty-${productId}`).value);
+            
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += qty;
+            } else {
+                cart.push({ ...product, quantity: qty });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            alert('Přidáno do košu!');
+        }
+        
+        // Aktualizace počtu v košu
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+        
+        // Zobrazení košu
+        function renderCart() {
+            if (cart.length === 0) {
+                document.getElementById('cartContent').innerHTML = '<div class="empty-cart">Koš je prázdný</div>';
+                return;
+            }
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const html = `
+                <div class="cart-items">
+                    ${cart.map(item => `
+                        <div class="cart-item">
+                            <div>
+                                <strong>${item.name}</strong> (${item.origin})<br>
+                                ${item.quantity}kg x ${item.price}Kč = <strong>${item.price * item.quantity}Kč</strong>
+                            </div>
+                            <button class="remove" onclick="removeFromCart(${item.id})">Smazat</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="cart-summary">Celkem: ${total} Kč</div>
+            `;
+            document.getElementById('cartContent').innerHTML = html;
+        }
+        
+        // Odstranění z košu
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            renderCart();
+        }
+        
+        // Objednávka
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Koš je prázdný!');
+                return;
+            }
+            if (!user.name || !user.email) {
+                alert('Nejdřív vyplňte svůj profil!');
+                showSection('profile');
+                return;
+            }
+            
+            const order = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('cs-CZ'),
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+            };
+            
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            
+            alert('Objednávka uložena! Děkujeme!');
+            showSection('profile');
+        }
+        
+        // Profil
+        function loadProfile() {
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userAddress').value = user.address;
+            
+            const ordersHtml = orders.length === 0 
+                ? '<p style="color: #999;">Žádné objednávky</p>'
+                : orders.map(o => `
+                    <div class="order">
+                        <strong>Objednávka #${o.id}</strong> - ${o.date}<br>
+                        ${o.items.map(i => `${i.name}: ${i.quantity}kg`).join(', ')}<br>
+                        <strong>Celkem: ${o.total}Kč</strong>
+                    </div>
+                `).join('');
+            
+            document.getElementById('ordersList').innerHTML = ordersHtml;
+        }
+        
+        function saveProfile() {
+            user = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                address: document.getElementById('userAddress').value
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+            alert('Profil uložen!');
+        }
+        
+        // Inicializace
+        renderProducts();
+        updateCartCount();
+        
+        // Ovládání nákupního košu
+        document.querySelectorAll('.section').forEach(section => {
+            if (section.id === 'cart') {
+                const observer = new MutationObserver(() => renderCart());
+                observer.observe(section, { attributes: true });
+            }
+        });
     </script>
 </body>
 </html>
