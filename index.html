@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banana E-shop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Banana E-shop!</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Products</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#" onclick="openAdminPanel()">Admin Panel</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="products">
+            <h2>Our Products</h2>
+            <div id="product-list"></div>
+        </section>
+        <section id="admin-panel" style="display:none;">
+            <h2>Admin Panel</h2>
+            <form id="login-form">
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="admin@ruzove-banany.cz" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" value="admin123" required>
+                <button type="submit">Login</button>
+            </form>
+            <div id="admin-functions" style="display:none;">
+                <h3>Manage Products</h3>
+                <button onclick="loadStatistics()">View Statistics</button>
+                <button onclick="viewOrders()">View Orders</button>
+                <button onclick="changePrices()">Change Prices</button>
+                <button onclick="changeProductNames()">Change Product Names</button>
+                <button onclick="changeOrigins()">Change Origins</button>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 Banana E-shop</p>
+    </footer>
+    <script src="script.js"></script>
+    <script>
+        function openAdminPanel() {
+            document.getElementById('admin-panel').style.display = 'block';
+        }
+        // Additional JavaScript functions for admin functionalities will go here.
+    </script>
+</body>
+</html>
